@@ -5,8 +5,8 @@ import { Input } from "../shared/Input";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ErrorMessage } from "../shared/ErrorMessage";
-import { foodMutations, foodQueries } from "../query-factories/foods";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { foodCollection } from "../collections/foodCollection";
+import { eq, useLiveQuery } from "@tanstack/react-db";
 import type { Status } from "../types/status.types";
 import { z } from "zod";
 
@@ -17,9 +17,6 @@ export const Route = createFileRoute("/admin/{-$foodId}")({
     }),
   },
   component: Admin,
-  loader: ({ context: { queryClient }, params: { foodId } }) => {
-    if (foodId) queryClient.ensureQueryData(foodQueries.getFoodById(foodId));
-  },
 });
 
 const newFood: NewFood = {
@@ -43,12 +40,12 @@ function Admin() {
   const [status, setStatus] = useState<Status>("idle");
   const navigate = useNavigate();
   const { foodId } = Route.useParams();
-  const { data: existingFood } = useQuery({
-    ...foodQueries.getFoodById(foodId),
-    enabled: !!foodId,
-  });
 
-  const foundFood = !!foodId && existingFood;
+  const { data: existingFood } = useLiveQuery((q) =>
+    q.from({ food: foodCollection }).where(({ food }) => eq(food.id, foodId))
+  );
+
+  const foundFood = !!foodId && existingFood.length === 1;
 
   if (foodId && !foundFood) {
     throw notFound(); //tanstack.com/router/latest/docs/framework/react/guide/not-found-errors#throwing-your-own-notfound-errors
@@ -56,20 +53,13 @@ function Admin() {
 
   useEffect(
     function populateForm() {
-      if (existingFood) {
-        setFood(existingFood);
+      if (foundFood && existingFood.length === 1) {
+        setFood(existingFood[0]);
       } else if (!foodId) {
         setFood(newFood);
       }
     },
-    [existingFood, foodId]
-  );
-
-  const { mutate: saveFood } = useMutation(
-    foodMutations.saveFood(() => {
-      toast.success(`Food ${"id" in food ? "saved" : "added"}!`);
-      navigate({ to: "/" }); // Redirect to the Menu
-    })
+    [foundFood, foodId, existingFood]
   );
 
   const errors = validate();
@@ -89,7 +79,20 @@ function Admin() {
       return; // If errors, stop here.
     }
     setStatus("submitting");
-    saveFood(food);
+    try {
+      // Instantly applies optimistic state, then syncs to server
+      if ("id" in food) {
+        foodCollection.update(food.id, (draft) => {
+          Object.assign(draft, food); // set all properties on draft to match food
+        });
+      } else {
+        foodCollection.insert({ ...food, id: crypto.randomUUID() }); // add temporary client-side id
+      }
+      toast.success(`Food ${"id" in food ? "saved" : "added"}!`);
+      navigate({ to: "/" }); // Redirect to the Menu
+    } catch {
+      setStatus("idle");
+    }
   }
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>) {

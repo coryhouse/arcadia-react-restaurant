@@ -4,7 +4,6 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { MyRouterContext } from "../Router";
 import { ReactBistroLogo } from "../shared/ReactBistroLogo";
 
@@ -45,7 +44,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
-      <ReactQueryDevtools />
       <TanStackRouterDevtools />
     </>
   ),

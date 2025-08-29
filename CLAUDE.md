@@ -20,7 +20,7 @@ This is a React restaurant menu application built with modern TypeScript tooling
 
 - **React 19** with TypeScript and Vite for fast development
 - **TanStack Router** for file-based routing with type-safe navigation
-- **TanStack Query** for server state management with optimistic updates
+- **TanStack DB** for server state management with optimistic updates
 - **Tailwind CSS 4** for styling
 - **JSON Server** as a mock REST API backend
 - **Zod** for runtime type validation
@@ -28,7 +28,7 @@ This is a React restaurant menu application built with modern TypeScript tooling
 
 ### Key Architectural Patterns
 
-1. **Query Factories Pattern**: All API interactions are centralized in `src/query-factories` using TanStack Query's QueryOptions API for reusable query definitions.
+1. **Tanstack DB Collections**: All API interactions are handled in `src/collections` using TanStack DB's collection API.
 
 2. **File-based Routing**: Routes are defined in `src/routes/` with TanStack Router's file-based routing system. The route tree is auto-generated in `routeTree.gen.ts`.
 
@@ -40,13 +40,13 @@ This is a React restaurant menu application built with modern TypeScript tooling
 
 - **API Base URL**: `http://localhost:3001/foods` (JSON Server)
 - **Data Validation**: All API responses are validated using Zod schemas defined in `src/food.ts`
-- **State Management**: Server state managed by TanStack Query, local UI state with React hooks
+- **State Management**: Server state managed by TanStack DB, local UI state with React hooks
 - **Optimistic Updates**: Mutations automatically invalidate and refetch related queries
 
 ### File Structure
 
 - `src/routes/` - File-based routing components
-- `src/query-factories/` - TanStack Query definitions and API layer
+- `src/collections/` - TanStack DB collections for API interactions
 - `src/shared/` - Reusable UI components
 - `src/types/` - TypeScript type definitions
 - `db.json` - Mock database for JSON Server
@@ -59,5 +59,5 @@ This is a React restaurant menu application built with modern TypeScript tooling
 - All forms use controlled components with validation
 - Images are served statically from `public/images/`
 - Toast notifications use Sonner library
-- The app includes React Query Devtools and TanStack Router Devtools for debugging
+- The app includes TanStack Router Devtools for debugging
 - After adding any new feature, add a Playwright test, or enhance an existing one.

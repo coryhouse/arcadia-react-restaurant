@@ -2,8 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { Food, FoodTag } from "../types/food.types";
 import { Card } from "./Card";
-import { useMutation } from "@tanstack/react-query";
-import { foodMutations } from "../query-factories/foods";
+import { foodCollection } from "../collections/foodCollection";
 
 const tagIcons: Record<FoodTag, string> = {
   Breakfast: "🥞",
@@ -23,12 +22,6 @@ type FoodCardProps = {
 };
 
 export function FoodCard({ food, showActions = false }: FoodCardProps) {
-  const { mutate: deleteFood } = useMutation(
-    foodMutations.deleteFood(() => {
-      toast.success("Food deleted");
-    })
-  );
-
   return (
     <Card>
       <div
@@ -68,7 +61,7 @@ export function FoodCard({ food, showActions = false }: FoodCardProps) {
                 aria-label={"Delete " + food.name}
                 className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                 onClick={() => {
-                  deleteFood(food.id);
+                  foodCollection.delete(food.id);
                   toast.success("Food deleted");
                 }}
               >

@@ -1,21 +1,19 @@
 import { useState } from "react";
 import { type FoodTag, foodTags } from "../types/food.types";
 import { createFileRoute } from "@tanstack/react-router";
-import { foodQueries } from "../query-factories/foods";
-import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "@tanstack/react-db";
+import { foodCollection } from "../collections/foodCollection";
 import { FoodCard } from "../shared/FoodCard";
 
 export const Route = createFileRoute("/")({
   component: Index,
   errorComponent: () => <div>Oops! Failed to load the menu.</div>,
-  loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData(foodQueries.getFoods()),
 });
 
 function Index() {
   const [selectedTag, setSelectedTag] = useState<FoodTag | "">("");
   const [searchText, setSearchText] = useState("");
-  const { data: foods, isLoading } = useQuery(foodQueries.getFoods());
+  const { data: foods, isLoading } = useLiveQuery(foodCollection);
 
   if (isLoading) return <p>Loading...</p>;
   if (!foods) return <p>No foods found</p>;
